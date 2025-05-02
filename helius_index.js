@@ -8,6 +8,8 @@ const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
 const chatIds = process.env.CHAT_IDS.split(',');
 const addressesMap = JSON.parse(process.env.ADDRESSES_MAP);
 
+const TX_FETCH_LIMIT = 10; // or 25, 50, 100
+
 let lastTransactionMap = {};
 const tokenNameCache = {};
 
@@ -21,12 +23,11 @@ const pollTransactions = async () => {
     await sleep(120000); // every 2 min
   }
 };
-pollTransactions();
 
 // 🟦 FETCH + FILTER
 const fetchTransactionsForAddress = async (address, name) => {
-  const fetchURL = `https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${API_KEY}&type=SWAP&limit=1`;
-
+  const fetchURL = `https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${API_KEY}&type=SWAP&limit=${TX_FETCH_LIMIT}`;
+  
   try {
     const response = await fetch(fetchURL);
     const data = await response.json();
@@ -212,3 +213,5 @@ const formatAmount = (amount) =>
 
 const sleep = (ms) =>
   new Promise(resolve => setTimeout(resolve, ms));
+
+pollTransactions();
