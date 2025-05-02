@@ -2,9 +2,10 @@
   "name": "hermesolana",
   "version": "1.0.0",
   "description": "we making million$$$",
-  "main": "index.js",
+  "main": "helius_index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node helius_index.js"
   },
   "author": "dounbug",
   "license": "ISC",
