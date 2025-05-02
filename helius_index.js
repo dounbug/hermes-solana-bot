@@ -13,7 +13,7 @@ const TX_FETCH_LIMIT = 10; // or 25, 50, 100
 let lastTransactionMap = {};
 const tokenNameCache = {};
 
-// 🟩 ENTRY POINT
+// 🟩 ENTRY POINTF
 const pollTransactions = async () => {
   while (true) {
     for (const [address, name] of Object.entries(addressesMap)) {
@@ -27,40 +27,33 @@ const pollTransactions = async () => {
 // 🟦 FETCH + FILTER
 const fetchTransactionsForAddress = async (address, name) => {
   const fetchURL = `https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${API_KEY}&type=SWAP&limit=${TX_FETCH_LIMIT}`;
-  
+
   try {
     const response = await fetch(fetchURL);
     const data = await response.json();
 
     if (!Array.isArray(data) || data.length === 0) {
-      console.log(`No transactions found for ${name}`);
       return;
     }
 
-    console.log(`Fetched ${data.length} transactions for ${name}`);
-
     if (!lastTransactionMap[address] && !TEST_RUN) {
-      console.log(`First time seeing ${name}, setting baseline tx without sending notifications.`);
       lastTransactionMap[address] = data[0].signature;
       return;
     }
 
     const newTransactions = [];
-
     for (const tx of data) {
       if (tx.signature === lastTransactionMap[address]) break;
       newTransactions.push(tx);
     }
 
     if (newTransactions.length > 0) {
+      console.log(`📬 ${newTransactions.length} new transactions for ${name}`);
       newTransactions.reverse();
       for (const tx of newTransactions) {
-        console.log(`New transaction for ${name}`);
         await parseTransaction(tx, name);
       }
       lastTransactionMap[address] = data[0].signature;
-    } else {
-      console.log(`No new transactions to process for ${name}`);
     }
   } catch (error) {
     console.error(`Error fetching transactions for ${name}:`, error);
@@ -133,6 +126,7 @@ const parseTransaction = async (transaction) => {
     tokenSymbol,
     readableTime,
     tokenMint,
+    reverse: alertType === 'SELL ALERT!'
   });
 
   if (TEST_RUN) {
@@ -143,12 +137,17 @@ const parseTransaction = async (transaction) => {
 };
 
 // 🟦 MESSAGING
-const buildMessage = ({ alertType, senderName, solAmount, tokenAmount, tokenName, tokenSymbol, readableTime, tokenMint }) => {
+const buildMessage = ({ alertType, senderName, solAmount, tokenAmount, tokenName, tokenSymbol, readableTime, tokenMint, reverse }) => {
   const chartURL = `https://dexscreener.com/solana/${tokenMint}`;
+
+  const line = reverse
+    ? `${tokenAmount} ${tokenName} ($${tokenSymbol}) ➡️ ${solAmount} SOL`
+    : `${solAmount} SOL ➡️ ${tokenAmount} ${tokenName} ($${tokenSymbol})`;
+
   return `${alertType}
 Time🕒: ${readableTime}
 Trader📈: ${senderName}
-${solAmount} SOL ➡️ ${tokenAmount} ${tokenName} ($${tokenSymbol})
+${line}
 📊 [Dexscreener](${chartURL})`;
 };
 
@@ -159,6 +158,7 @@ const sendTelegramMessage = async (message) => {
       chat_id: chatId,
       text: message,
       parse_mode: 'Markdown',
+      disable_web_page_preview: true  //Change if you want preview of Dexscreener link
     };
 
     try {
