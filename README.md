@@ -43,8 +43,8 @@ CHAT_IDS=111111111,222222222,333333333
 
 # JSON map of wallet addresses to human-readable labels
 ADDRESSES_MAP={
-  "YourWalletAddress1": "Label1",
-  "YourWalletAddress2": "Label2"
+  "PocketWatchingWalletAddress1": "Name1",
+  "PocketWatchingWalletAddress2": "Name2"
 }
 ```
 
@@ -64,9 +64,9 @@ The bot will begin polling for wallet activity every 2 minutes.
 
 ```
 BUY ALERT!
-Time🕒: 03:44 PM
+Time(EST)🕒: 04:44 PM
 Trader📈: dounbug
-1.20 SOL ➡️ 44,230 HOUSECOIN ($HOUSE)
+6.90 SOL ➡️ 44,230 HOUSECOIN ($HOUSE)
 💰 Market Cap: $945,327
 📊 Dexscreener: https://dexscreener.com/solana/...
 ```
