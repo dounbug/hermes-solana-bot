@@ -70,9 +70,12 @@ const parseTransaction = async (transaction) => {
     return;
   }
 
-  const readableTime = new Date(transaction.timestamp * 1000).toLocaleTimeString('en-US', {
+  const readableTime = new Date(transaction.timestamp * 1000).toLocaleString('en-US', {
+    timeZone: 'America/New_York',
     hour: '2-digit',
     minute: '2-digit',
+    day: 'numeric',
+    month: 'short',
   });
 
   const outgoingToken = tokenTransfers.find(t => addressesMap[t.fromUserAccount]);
@@ -120,6 +123,7 @@ const parseTransaction = async (transaction) => {
   const message = buildMessage({
     alertType,
     senderName,
+    userAddress,
     solAmount,
     tokenAmount,
     tokenName,
@@ -137,7 +141,7 @@ const parseTransaction = async (transaction) => {
 };
 
 // 🟦 MESSAGING
-const buildMessage = ({ alertType, senderName, solAmount, tokenAmount, tokenName, tokenSymbol, readableTime, tokenMint, reverse }) => {
+const buildMessage = ({ alertType, senderName, userAddress, solAmount, tokenAmount, tokenName, tokenSymbol, readableTime, tokenMint, reverse }) => {
   const chartURL = `https://dexscreener.com/solana/${tokenMint}`;
 
   const line = reverse
@@ -145,8 +149,8 @@ const buildMessage = ({ alertType, senderName, solAmount, tokenAmount, tokenName
     : `${solAmount} SOL ➡️ ${tokenAmount} ${tokenName} ($${tokenSymbol})`;
 
   return `${alertType}
-Time🕒: ${readableTime}
-Trader📈: ${senderName}
+Time(EST)🕒: ${readableTime}
+Trader📈: [${senderName}](https://solscan.io/account/${userAddress})
 ${line}
 📊 [Dexscreener](${chartURL})`;
 };
